@@ -12,6 +12,7 @@ class ViewController: UITableViewController {
     
     var allWords = [String]()
     var usedWords = [String]()
+    var currentWord: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,11 +30,24 @@ class ViewController: UITableViewController {
             allWords = ["silkworm"]
         }
         
-        startGame()
+        let defaults = UserDefaults.standard
+        if let savedTitle = defaults.object(forKey: "savedTitle") as? String {
+            if let savedWords = defaults.object(forKey: "savedWords") as? [String] {
+                title = savedTitle
+                usedWords = savedWords
+                print("loaded old game")
+            } else {
+                print("could not load old game")
+            }
+        } else {
+            startGame()
+        }
+        
     }
     
     @objc func startGame(){
         title = allWords.randomElement()
+        currentWord = title
         usedWords.removeAll(keepingCapacity: true)
         tableView.reloadData()
     }
@@ -78,7 +92,7 @@ class ViewController: UITableViewController {
                     }
                     
                     usedWords.insert(lowerAnswer, at: 0)
-                    
+                    save()
                     let indexPath = IndexPath(row: 0, section: 0)
                     tableView.insertRows(at: [indexPath], with: .automatic)
                     
@@ -134,6 +148,13 @@ class ViewController: UITableViewController {
         ac.addAction(UIAlertAction(title: "OK", style: .default))
         present(ac, animated: true)
         
+    }
+    func save(){
+        let defaults = UserDefaults.standard
+        defaults.set(currentWord, forKey: "savedTitle")
+        defaults.set(usedWords, forKey: "savedWords")
+        
+        print("saving")
     }
 }
 
